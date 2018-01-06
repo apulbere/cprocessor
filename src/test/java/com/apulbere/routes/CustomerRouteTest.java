@@ -1,6 +1,6 @@
 package com.apulbere.routes;
 
-import com.apulbere.cprocessor.routes.CustomerConsumer;
+import com.apulbere.cprocessor.routes.CustomerRoute;
 import org.apache.camel.CamelContext;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.ProducerTemplate;
@@ -17,11 +17,14 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 @RunWith(CamelSpringBootRunner.class)
-@SpringBootTest(classes = CustomerConsumer.class)
+@SpringBootTest(classes = CustomerRoute.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @EnableAutoConfiguration
-public class CustomerConsumerTest extends CamelTestSupport {
+public class CustomerRouteTest extends CamelTestSupport {
 
     @Autowired
     private CamelContext camelContext;
@@ -43,14 +46,18 @@ public class CustomerConsumerTest extends CamelTestSupport {
                     weaveByType(ToDynamicDefinition.class).replace().to("mock:toRedis");
                 }
         });
+
+        Files.copy(getClass().getResourceAsStream("/8f9ed0f5-1440-4754-954a-4ef4da1a2093.customer.json"),
+                Paths.get("in/8f9ed0f5-1440-4754-954a-4ef4da1a2093.customer.json"));
+
     }
 
     @Test
-    public void notWorkingTest() throws Exception {
+    public void routeIsProcessingTheUpload() throws Exception {
         MockEndpoint mockToRedis = getMockEndpoint("mock:toRedis");
         mockToRedis.expectedMessageCount(2);
 
-        producerTemplate.sendBody("8f9ed0f5-1440-4754-954a-4ef4da1a2093");
+        producerTemplate.sendBodyAndHeader(null, "uploadId", "8f9ed0f5-1440-4754-954a-4ef4da1a2093");
 
         mockToRedis.assertIsSatisfied();
     }

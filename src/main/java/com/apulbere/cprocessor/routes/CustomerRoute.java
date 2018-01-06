@@ -9,14 +9,15 @@ import org.apache.camel.component.redis.RedisConstants;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CustomerConsumer extends RouteBuilder {
+public class CustomerRoute extends RouteBuilder {
+
     private JacksonDataFormat dataFormat = new ListJacksonDataFormat(Customer.class);
 
     @Override
     public void configure() throws Exception {
         from("direct:customerToRedis")
-            .log(LoggingLevel.INFO, "Inserting customers into Redis for upload id: ${body}")
-            .pollEnrich("file:in?fileName=customer.json")
+            .log(LoggingLevel.INFO, "Inserting customers into Redis for upload id: ${header.uploadId}")
+            .pollEnrich().simple("file:in?fileName=${header.uploadId}.customer.json&delete=true")
             .unmarshal(dataFormat)
             .split(body())
                 .setHeader(RedisConstants.KEY, constant("customerLookup"))
