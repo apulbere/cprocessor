@@ -18,4 +18,9 @@ dependencies {
     compile('org.apache.camel:camel-spring-redis:2.20.1')
 
     compileOnly('org.projectlombok:lombok:1.16.18')
+
+    testCompile('org.apache.camel:camel-test-spring:2.20.1')
+    testCompile('org.springframework.boot:spring-boot-starter-test:1.5.9.RELEASE')
+
+
 }
